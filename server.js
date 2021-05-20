@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
 const session = require('express-session');
+const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const passport = require('./config/passport');
 require('dotenv').config(); 
@@ -20,6 +21,7 @@ const usersRouter = require('./routes/users');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 app.use(cookieParser());
 app.use(session({
   secret: 'secret key',

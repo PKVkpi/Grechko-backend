@@ -51,10 +51,8 @@ module.exports = function (passport) {
     }), async function (req, res) {
         console.log('in post login');
         console.log(req.sessionID);
-        console.log(req.cookies);
-        const id = req.user.id;
         console.log(req.user);
-        res.send(req.cookies);
+        res.status(200).json(req.sessionID);
     })
 
     return router;
