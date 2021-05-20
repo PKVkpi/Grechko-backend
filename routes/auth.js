@@ -1,6 +1,17 @@
 const router = require('express').Router();
 const pool = require('../config/config');
 
+router.get('/login', function (req, res) {
+
+    console.log('in get login');
+    // console.log(req.user);
+
+
+    const data = {};
+    data.title = 'Login';
+    res.status(200).json(data);
+});
+
 router.post('/signup', (request, response) => {
     const role = 0;
     const password = request.body.password ? request.body.password : null;
@@ -32,4 +43,21 @@ router.post('/signup', (request, response) => {
     })
 })
 
-module.exports = router;
+module.exports = function (passport) {
+    console.log('here');
+
+    router.post('/login', passport.authenticate('local', {
+        failureRedirect: '/login',
+    }), async function (req, res) {
+        console.log('in post login');
+        console.log(req.sessionID);
+        console.log(req.cookies);
+        const id = req.user.id;
+        console.log(req.user);
+        res.send(req.cookies);
+    })
+
+    return router;
+};
+
+// module.exports = router;
