@@ -2,14 +2,11 @@ const router = require('express').Router();
 const pool = require('../config/config');
 const { loginRequired } = require('../middlewares/auth');
 
-router.put('/:id/update', (request, response) => {
+router.put('/:id/update', loginRequired, (request, response) => {
     const userId = request.params.id;
-
-    console.log(request.user.rows[0]);
-
     const currentUser = request.user.rows[0];
     if (currentUser.id != userId && currentUser.role != 2) {
-        // response.status(403).json('Forbidden');
+        response.status(403).json('Forbidden');
         console.log('forbidden');
     }
 

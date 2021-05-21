@@ -1,16 +1,40 @@
 const router = require('express').Router();
 const pool = require('../config/config');
+const passport = require('../config/passport')
 
 router.get('/login', function (req, res) {
-
-    console.log('in get login');
-    // console.log(req.user);
-
-
     const data = {};
     data.title = 'Login';
     res.status(200).json(data);
 });
+
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, theUser, failureDetails) => {
+        if (err) {
+            res.status(500).json({ message: 'Something went wrong authenticating user' });
+            return;
+        }
+
+        if (!theUser) {
+            res.status(401).json(failureDetails);
+            return;
+        }
+
+        // save user in session
+        req.login(theUser.id, (err) => {
+            if (err) {
+                res.status(500).json({ message: 'Session save went bad.' });
+                return;
+            }
+            res.status(200).json(req.sessionID);
+        });
+    })(req, res, next);
+});
+
+router.post('/logout', (req, res) => {
+    req.logout();
+    res.status(200).json('OK');
+})
 
 router.post('/signup', (request, response) => {
     const role = 0;
@@ -43,19 +67,4 @@ router.post('/signup', (request, response) => {
     })
 })
 
-module.exports = function (passport) {
-    console.log('here');
-
-    router.post('/login', passport.authenticate('local', {
-        failureRedirect: '/login',
-    }), async function (req, res) {
-        console.log('in post login');
-        console.log(req.sessionID);
-        console.log(req.user);
-        res.status(200).json(req.sessionID);
-    })
-
-    return router;
-};
-
-// module.exports = router;
+module.exports = router;

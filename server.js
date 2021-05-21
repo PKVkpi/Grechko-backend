@@ -19,15 +19,25 @@ const usersRouter = require('./routes/users');
 
 //initiating express
 app.use(bodyParser.json());
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
+  next();
+});
 app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser());
 app.use(express.json());
-app.use(cors());
 app.use(cookieParser());
+app.use(express.static("public"));
 app.use(session({
   secret: 'secret key',
-  saveUninitialized: false,
-  resave: false,
-  cookie: { maxAge : 3600000 } //1 Hour
+  saveUninitialized: true,
+  resave: false
+  // cookie: {secure: false}
+  // cookie: { maxAge : 3600000 } //1 Hour
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -36,7 +46,7 @@ app.use(passport.session());
 app.use('/search', searchRouter);
 app.use('/courtExperts', courtExpertsRouter);
 app.use('/users', usersRouter);
-app.use('/', authRouter(passport));
+app.use('/', authRouter);
 
 //http://localhost:3000
 app.get('/', (request, response) => {

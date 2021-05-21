@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const pool = require('../config/config');
+const { loginRequired } = require('../middlewares/auth');
 
 router.post('/add', (request, response) => {
     const name = request.body.name ? request.body.name : null;
@@ -32,10 +33,17 @@ router.post('/add', (request, response) => {
     })
 })
 
-router.put('/:id/update', (request, response) => {
+router.put('/:id/update', loginRequired, (request, response) => {
     const courtExpertId = request.params.id;
+    const currentUser = request.user.rows[0];
+    if (currentUser.id != courtExpertId && currentUser.role == 0) {
+        response.status(403).json('Forbidden');
+        console.log('forbidden');
+    }
 
-    // console.log(request.user.rows[0]);
+    console.log('upd ce');
+    console.log(currentUser);
+    console.log(courtExpertId);
 
     // const currentUser = request.user.rows[0].role;
     // if (user.id != userId && currentUser != 2) {
