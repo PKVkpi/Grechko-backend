@@ -1,8 +1,38 @@
 const router = require('express').Router();
 const pool = require('../config/config');
-const { loginRequired } = require('../middlewares/auth');
+const { loginRequired, registratorLogined } = require('../middlewares/auth');
 
-router.post('/add', (request, response) => {
+router.get('/', (request, response) => {
+    const query = `SELECT * FROM public."courtExperts";`;
+    pool.query(query, (err, res) => {
+        if (err) {
+            console.log(err);
+            return response.status(400).json(err);
+        } 
+
+        const courtExperts = res.rows[0];
+        response.status(200).json(courtExperts);
+    })
+})
+
+router.get('/:id', (request, response) => {
+    const query = `SELECT * FROM public."courtExperts" WHERE id = ${userId};`;
+    pool.query(query, (err, res) => {
+        if (err) {
+            console.log(err);
+            return response.status(400).json(err);
+        } 
+
+        const courtExpert = res.rows[0];
+        if (!courtExpert) {
+            return response.status(404).json('Not found');
+        }
+
+        response.status(200).json(courtExpert);
+    })
+})
+
+router.post('/add', registratorLogined, (request, response) => {
     const name = request.body.name ? request.body.name : null;
     const surname = request.body.surname ? request.body.surname : null;
     const EKKName = request.body.EKKName ? request.body.EKKName : null;
@@ -27,7 +57,7 @@ router.post('/add', (request, response) => {
     pool.query(query, (err, res) => {
         if (err) {
             console.log(err);
-            response.status(400).json(err);
+            return response.status(400).json(err);
         }
         response.status(200).json('OK');
     })
@@ -38,18 +68,8 @@ router.put('/:id/update', loginRequired, (request, response) => {
     const currentUser = request.user.rows[0];
     if (currentUser.id != courtExpertId && currentUser.role == 0) {
         response.status(403).json('Forbidden');
-        console.log('forbidden');
+        return console.log('forbidden');
     }
-
-    console.log('upd ce');
-    console.log(currentUser);
-    console.log(courtExpertId);
-
-    // const currentUser = request.user.rows[0].role;
-    // if (user.id != userId && currentUser != 2) {
-    //     // response.status(403).json('Forbidden');
-    //     console.log('forbidden');
-    // }
 
     const name = request.body.name ? request.body.name : null;
     const surname = request.body.surname ? request.body.surname : null;
@@ -65,20 +85,81 @@ router.put('/:id/update', loginRequired, (request, response) => {
     const phone = request.body.phone ? request.body.phone : null;
     const workplaceId = request.body.workplaceId ? request.body.workplaceId : null;
     const secondName = request.body.secondName ? request.body.secondName : null;
+    const currDate = new Date().toISOString();
 
-    const query = `UPDATE public."courtExperts" SET ` +
+    const query = `SELECT * FROM public."courtExperts" WHERE id = ${courtExpertId};`;
+
+    pool.query(query, (err, res) => {
+        if (err) {
+            console.log(err);
+            return response.status(400).json(err);
+        }
+
+        const oldCourtExpert = res.rows[0];
+        if (!oldCourtExpert) {
+            return response.status(404).json('Not fopund');
+        }
+
+        const query = `UPDATE public."courtExperts" SET ` +
         `(name, surname, ekkname, ekkdate, ekknumber, qualdate, qualnumber, ` +
         `expertisetype, expertspeciality, location, email, phone, workplaceid, secondname) = ` +
         `('${name}', '${surname}', '${EKKName}', '${EKKDate}', '${EKKNumber}', '${qualDate}', '${qualNumber}', ` +
         `${expertiseType}, '${expertSpeciality}', '${location}', '${email}', '${phone}', ${workplaceId}, '${secondName}') WHERE id = ${courtExpertId};`
 
-    pool.query(query, (err, res) => {
-        if (err) {
-            console.log(err);
-            response.status(400).json(err);
-        }
-        response.status(200).json('OK');
-    })
+        pool.query(query, (err, res) => {
+            if (err) {
+                console.log(err);
+                return response.status(400).json(err);
+            }
+
+            const changedFrom = {
+                'name': oldCourtExpert.name,
+                'surname': oldCourtExpert.surname,
+                'ekkname': oldCourtExpert.ekkname,
+                'ekkdate': oldCourtExpert.ekkdate,
+                'ekknumber': oldCourtExpert.ekknumber,
+                'qualdate': oldCourtExpert.qualdate,
+                'qualnumber': oldCourtExpert.qualnumber,
+                'expertisetype': oldCourtExpert.expertisetype,
+                'expertspeciality': oldCourtExpert.expertspeciality,
+                'location': oldCourtExpert.location,
+                'email': oldCourtExpert.email,
+                'phone': oldCourtExpert.phone,
+                'workplaceid': oldCourtExpert.workplaceid,
+                'secondname': oldCourtExpert.secondname
+            }
+            const changedTo = {
+                'name': name,
+                'surname': surname,
+                'ekkname': EKKName,
+                'ekkdate': EKKDate,
+                'ekknumber': qualNumber,
+                'qualdate': qualDate,
+                'qualnumber': qualNumber,
+                'expertisetype': expertiseType,
+                'expertspeciality': expertSpeciality,
+                'location': location,
+                'email': email,
+                'phone': phone,
+                'workplaceid': workplaceId,
+                'secondname': secondName
+            }
+
+
+            const query = `INSERT INTO public."archive" ` +
+            `(tablica, entityid, changedfrom, changedTo, changedby, changedate) VALUES ` +
+            `('courtExperts', ${courtExpertId}, '${JSON.stringify(changedFrom)}', '${JSON.stringify(changedTo)}', ${currentUser.id}, '${currDate}');` 
+
+            pool.query(query, (err, res) => {
+                if (err) {
+                    console.log(err);
+                    return response.status(400).json(err);
+                }
+
+                response.status(200).json('OK');
+            });
+        });
+    });
 })
 
 module.exports = router;
