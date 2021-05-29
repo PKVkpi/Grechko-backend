@@ -10,12 +10,13 @@ router.get('/', (request, response) => {
             return response.status(400).json(err);
         } 
 
-        const courtExperts = res.rows[0];
+        const courtExperts = res.rows;
         response.status(200).json(courtExperts);
     })
 })
 
 router.get('/:id', (request, response) => {
+    const userId = request.params.id;
     const query = `SELECT * FROM public."courtExperts" WHERE id = ${userId};`;
     pool.query(query, (err, res) => {
         if (err) {
@@ -23,7 +24,7 @@ router.get('/:id', (request, response) => {
             return response.status(400).json(err);
         } 
 
-        const courtExpert = res.rows[0];
+        const courtExpert = res.rows;
         if (!courtExpert) {
             return response.status(404).json('Not found');
         }

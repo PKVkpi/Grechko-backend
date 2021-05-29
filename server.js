@@ -12,7 +12,7 @@ require('dotenv').config();
 const port = process.env.PORT;
 
 //routes
-const searchRouter = require('./routes/search');
+const positionsRouter = require('./routes/positions');
 const authRouter = require('./routes/auth');
 const courtExpertsRouter = require('./routes/courtExperts');
 const usersRouter = require('./routes/users');
@@ -43,7 +43,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //used routes
-app.use('/search', searchRouter);
+app.use('/positions', positionsRouter);
 app.use('/courtExperts', courtExpertsRouter);
 app.use('/users', usersRouter);
 app.use('/', authRouter);
