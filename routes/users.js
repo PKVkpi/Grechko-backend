@@ -16,6 +16,7 @@ router.get('/', (request, response) => {
 })
 
 router.get('/:id', (request, response) => {
+    const userId = request.params.id;
     const query = `SELECT * FROM public."users" WHERE id = ${userId};`;
     pool.query(query, (err, res) => {
         if (err) {
@@ -39,18 +40,6 @@ router.put('/:id/update', loginRequired, (request, response) => {
         return response.status(403).json('Forbidden');
     }
 
-    const role = request.body.role || null;
-    const password = request.body.password || null;
-    const name = request.body.name || null;
-    const surname = request.body.surname || null;
-    const location = request.body.location || null;
-    const passportSeries = request.body.passportSeries || null;
-    const passportNumber = request.body.passportNumber || null;
-    const passportIssuingAuthority = request.body.passportIssuingAuthority || null;
-    const passportIssuingDate = request.body.passportIssuingDate || null;
-    const identificationCode = request.body.identificationCode || null; 
-    const workplaceId = request.body.workplaceId || null;
-    const secondName = request.body.secondName || null;
     const currDate = new Date().toISOString();
 
     const query = `SELECT * FROM public."users" WHERE id = ${userId};`;
@@ -67,11 +56,27 @@ router.put('/:id/update', loginRequired, (request, response) => {
         if (!oldUser) {
             return response.status(404).json('Not found');
         }
+        
+        const role = request.body.role || oldUser.role;
+        
 
         if (currentUser.role != 2 && oldUser.role != role) {
             return response.status(403).json("Forbidden action");
         }
 
+        
+        const password = request.body.password || oldUser.password;
+        const name = request.body.name || oldUser.name;
+        const surname = request.body.surname || oldUser.surname;
+        const location = request.body.location || oldUser.location;
+        const passportSeries = request.body.passportSeries || oldUser.passportSeries;
+        const passportNumber = request.body.passportNumber || oldUser.passportNumber;
+        const passportIssuingAuthority = request.body.passportIssuingAuthority || oldUser.passportIssuingAuthority;
+        const passportIssuingDate = request.body.passportIssuingDate || oldUser.passportIssuingDate;
+        const identificationCode = request.body.identificationCode || oldUser.identificationCode; 
+        const workplaceId = request.body.workplaceId || oldUser.workplaceId || 1;
+        const secondName = request.body.secondName || oldUser.secondName;
+        console.log(password)
         const query = `UPDATE public."users" SET (role, password, name, surname, location, passportSeries, passportnumber, ` +
             `passportissuingauthority, passportissuingdate, identificationcode, workplaceid, secondname) = ` +
             `('${role}', '${password}', '${name}', '${surname}', '${location}', '${passportSeries}', '${passportNumber}', ` +

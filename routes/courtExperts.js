@@ -33,7 +33,7 @@ router.get('/:id', (request, response) => {
     })
 })
 
-router.post('/add', registratorLogined, (request, response) => {
+router.post('/add', loginRequired, (request, response) => {
     const name = request.body.name ? request.body.name : null;
     const surname = request.body.surname ? request.body.surname : null;
     const EKKName = request.body.EKKName ? request.body.EKKName : null;
@@ -53,8 +53,9 @@ router.post('/add', registratorLogined, (request, response) => {
         `(name, surname, ekkname, ekkdate, ekknumber, qualdate, qualnumber, ` +
         `expertisetype, expertspeciality, location, email, phone, workplaceid, secondname) ` +
         `VALUES ('${name}', '${surname}', '${EKKName}', '${EKKDate}', '${EKKNumber}', '${qualDate}', '${qualNumber}', ` +
-        `${expertiseType}, '${expertSpeciality}', '${location}', '${email}', '${phone}', ${workplaceId}, '${secondName}');`
+        `'${expertiseType}', '${expertSpeciality}', '${location}', '${email}', '${phone}', ${workplaceId}, '${secondName}');`
 
+    console.log(request.body)
     pool.query(query, (err, res) => {
         if (err) {
             console.log(err);
@@ -105,7 +106,7 @@ router.put('/:id/update', loginRequired, (request, response) => {
         `(name, surname, ekkname, ekkdate, ekknumber, qualdate, qualnumber, ` +
         `expertisetype, expertspeciality, location, email, phone, workplaceid, secondname) = ` +
         `('${name}', '${surname}', '${EKKName}', '${EKKDate}', '${EKKNumber}', '${qualDate}', '${qualNumber}', ` +
-        `${expertiseType}, '${expertSpeciality}', '${location}', '${email}', '${phone}', ${workplaceId}, '${secondName}') WHERE id = ${courtExpertId};`
+        `'${expertiseType}', '${expertSpeciality}', '${location}', '${email}', '${phone}', ${workplaceId}, '${secondName}') WHERE id = ${courtExpertId};`
 
         pool.query(query, (err, res) => {
             if (err) {

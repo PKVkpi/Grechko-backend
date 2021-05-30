@@ -34,7 +34,7 @@ router.post('/logout', (req, res) => {
 })
 
 router.post('/signup', (request, response) => {
-    const role = 0;
+    const role = 1;
     const password = request.body.password ? request.body.password : null;
     const name = request.body.name ? request.body.name : null;
     const surname = request.body.surname ? request.body.surname : null;
